@@ -26,4 +26,5 @@ dependencies {
     compile 'com.android.support:design:23.0.1'
     compile files('libs/Parse-1.10.3/bolts-android-1.2.1.jar')
     compile files('libs/Parse-1.10.3/Parse-1.10.3.jar')
+    compile 'com.jakewharton:butterknife:7.0.1'
 }

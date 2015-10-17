@@ -325,7 +325,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.i("LoginActivity", e.getMessage());
+                Log.e("LoginActivity", e.getMessage());
                 return false;
             }
         }
