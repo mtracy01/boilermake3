@@ -1,9 +1,11 @@
 package modular.virtualwhiteboardandroid;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -64,11 +66,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void done(Object o, Throwable throwable) {
-                ArrayList<String> names = new ArrayList<>();
-                ParseObject parseObject = (ParseObject) o;
-                names.add((String) parseObject.get("boardName"));
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, (String[]) names.toArray());
-                listView.setAdapter(adapter);
+                /*ArrayList<String> names = new ArrayList<>();
+                if(o!=null) {
+                    ParseObject parseObject = (ParseObject) o;
+                    names.add((String) parseObject.get("boardName"));
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, (String[]) names.toArray());
+                    listView.setAdapter(adapter);
+                }*/
             }
 
             public void printErrorMessage(Exception e) {
@@ -92,8 +96,26 @@ public class MainActivity extends AppCompatActivity {
         b.setPositiveButton("Create Board", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //TODO: Check if board by this name already exists
-                //TODO: Create board object
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ParseQuery query = new ParseQuery("Whiteboard");
+                            query.include("boardName");
+                            query.whereContains("boardName", editText.getText().toString());
+                            List l = query.find();
+                            if(l.size()==0){
+                                ParseObject parseObject = new ParseObject("Whiteboard");
+                                parseObject.add("boardName",editText.getText().toString());
+                                parseObject.add("owner",ParseUser.getCurrentUser().getUsername());
+                                parseObject.save();
+                            }
+                        } catch(Exception e){
+                            Log.e("MainActivity",e.getMessage());
+                        }
+                    }
+                };
+                r.run();
             }
         });
         b.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -105,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
         b.show();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @OnClick(R.id.delete)
     void dBoard(){
         AlertDialog.Builder b = new AlertDialog.Builder(context);
@@ -114,7 +137,32 @@ public class MainActivity extends AppCompatActivity {
         b.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //TODO: Delete the board and all vectors associated with it
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        ParseQuery q1 = new ParseQuery("Whiteboard");
+                        String boardId;
+                        try {
+                            List l = q1.find();
+                            ParseObject parseObject = (ParseObject) l.get(0);
+                            boardId = (String) parseObject.get("ObjectId");
+                            parseObject.delete();
+                            ParseQuery q2 = new ParseQuery("Vector");
+                            q2.whereContains(boardId,boardId);
+                            List l2=q2.find();
+                            for(Object o: l2){
+                                parseObject = (ParseObject)o;
+                                parseObject.delete();
+                            }
+                        } catch (Exception e) {
+                            Log.e("MainActivity", e.getMessage());
+                        }
+
+                    }
+                };
+                r.run();
+
+
             }
         });
         b.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
