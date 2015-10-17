@@ -18,4 +18,6 @@
     <string name="action_sign_up">Create Account</string>
     <string name="log_out">Log Out</string>
     <string name="refresh">Refresh</string>
+    <string name="new_board">New Board</string>
+    <string name="delete_board">Delete Board</string>
 </resources>

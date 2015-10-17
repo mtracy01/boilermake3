@@ -1,6 +1,8 @@
 package modular.virtualwhiteboardandroid;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -10,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.parse.FindCallback;
@@ -35,15 +38,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         listView =(ListView)findViewById(R.id.list);
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
-
         refresh();
 
 
@@ -55,36 +49,80 @@ public class MainActivity extends AppCompatActivity {
         parseQuery.findInBackground(new FindCallback() {
             @Override
             public void done(List list, ParseException e) {
-                if(e!=null){
+                if (e != null) {
                     printErrorMessage(e);
                     return;
                 }
                 ArrayList<String> names = new ArrayList<>();
-                for(Object object: list){
-                    ParseObject parseObject = (ParseObject)object;
+                for (Object object : list) {
+                    ParseObject parseObject = (ParseObject) object;
                     names.add((String) parseObject.get("boardName"));
                 }
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),android.R.layout.simple_list_item_1,android.R.id.text1,(String[])names.toArray());
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, (String[]) names.toArray());
                 listView.setAdapter(adapter);
             }
 
             @Override
             public void done(Object o, Throwable throwable) {
                 ArrayList<String> names = new ArrayList<>();
-                ParseObject parseObject = (ParseObject)o;
+                ParseObject parseObject = (ParseObject) o;
                 names.add((String) parseObject.get("boardName"));
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),android.R.layout.simple_list_item_1,android.R.id.text1,(String[])names.toArray());
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, (String[]) names.toArray());
                 listView.setAdapter(adapter);
             }
-            public void printErrorMessage(Exception e){
-                Log.e("MainActivity",e.getMessage());
+
+            public void printErrorMessage(Exception e) {
+                Log.e("MainActivity", e.getMessage());
             }
         });
     }
     @OnClick(R.id.logout)
     void logout(){
         ParseUser.logOut();
-        startActivity(new Intent(MainActivity.this,LoginActivity.class));
+        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+    }
+
+    @OnClick(R.id.new_board)
+    void nBoard(){
+        final EditText editText= new EditText(this);
+        AlertDialog.Builder b = new AlertDialog.Builder(context);
+        b.setTitle("New Board");
+        b.setMessage("Set board name:");
+        b.setView(editText);
+        b.setPositiveButton("Create Board", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //TODO: Check if board by this name already exists
+                //TODO: Create board object
+            }
+        });
+        b.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        b.show();
+    }
+
+    @OnClick(R.id.delete)
+    void dBoard(){
+        AlertDialog.Builder b = new AlertDialog.Builder(context);
+        b.setTitle("Delete Board");
+        b.setMessage("Select a board to delete:");
+        b.setView(R.id.list);
+        b.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //TODO: Delete the board and all vectors associated with it
+            }
+        });
+        b.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
     }
 
 }
